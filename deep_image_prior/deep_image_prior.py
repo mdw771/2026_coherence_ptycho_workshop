@@ -6,26 +6,33 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    import marimo as mo
+    import logging
     import sys
     from pathlib import Path
+    import copy
     sys.path.append(Path(__file__).parent.parent.as_posix())
-    print(sys.path)
+    logging.basicConfig(level=logging.INFO)
 
     import torch
+    import matplotlib.pyplot as plt
 
     import ptychi.api as api
     from ptychi.api.task import PtychographyTask
     from ptychi.utils import get_suggested_object_size, get_default_complex_dtype, generate_initial_opr_mode_weights
 
-    from util import load_ptychodus_data
+    from util import load_ptychodus_data, plot_object
 
     return (
         Path,
         PtychographyTask,
         api,
+        copy,
         get_default_complex_dtype,
         get_suggested_object_size,
         load_ptychodus_data,
+        mo,
+        plot_object,
         torch,
     )
 
@@ -51,7 +58,6 @@ def _(PROJECT_ROOT, load_ptychodus_data):
 
 @app.cell
 def _(
-    PtychographyTask,
     api,
     data,
     get_default_complex_dtype,
@@ -83,26 +89,59 @@ def _(
     options.object_options.step_size = 1e-5
 
     options.probe_options.initial_guess = probe
-    options.probe_options.optimizable = True
-    options.probe_options.optimizer = api.Optimizers.SGD
-    options.probe_options.step_size = 0.1
 
     options.probe_position_options.position_x_px = positions_px[:, 1]
     options.probe_position_options.position_y_px = positions_px[:, 0]
     options.probe_position_options.optimizable = False
 
     options.reconstructor_options.batch_size = 100
-    options.reconstructor_options.num_epochs = 16
+    options.reconstructor_options.num_epochs = 100
     options.reconstructor_options.allow_nondeterministic_algorithms = False
+    return (options,)
 
+
+@app.cell
+def _(PtychographyTask, options):
     task = PtychographyTask(options)
     task.run()
     return (task,)
 
 
 @app.cell
-def _(task):
+def _(plot_object, task):
     recon = task.get_data_to_cpu('object', as_numpy=True)[0, 250:500, 250:500]
+    plot_object(recon)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Now make a copy of the Options object and decimate the data by 20 times.
+    """)
+    return
+
+
+@app.cell
+def _(copy, options):
+    options_downsampled = copy.deepcopy(options)
+    options_downsampled.data_options.data = options.data_options.data[::20]
+    options_downsampled.probe_position_options.position_x_px = options.probe_position_options.position_x_px[::20]
+    options_downsampled.probe_position_options.position_y_px = options.probe_position_options.position_y_px[::20]
+    return (options_downsampled,)
+
+
+@app.cell
+def _(PtychographyTask, options_downsampled):
+    task_downsampled = PtychographyTask(options_downsampled)
+    task_downsampled.run()
+    return (task_downsampled,)
+
+
+@app.cell
+def _(plot_object, task_downsampled):
+    recon_downsampled = task_downsampled.get_data_to_cpu('object', as_numpy=True)[0, 250:500, 250:500]
+    plot_object(recon_downsampled)
     return
 
 
