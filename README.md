@@ -8,54 +8,50 @@ Just go to Analysis -> My Sessions, you'll see the session is actually running.
 
 # Setting up environment and installing packages
 
-## If conda is not available
+## Installing uv
 
-Install Miniforge:
+We use `uv` to install and manage the environment. First, install `uv`:
 ```
-curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-```
-Then install Miniforge with `bash Miniforge3-Linux-x86_64.sh`. When asked about installation path, use `/dectris_data/miniforge3`.
-
-Open a new bash terminal or source the bashrc `source ~/.bashrc` to enable conda.
-
-## Installing software
-
-### Installing Ptychodus with Pty-Chi
-
-```
-conda create -y -n ptycho python==3.11
-conda activate ptycho
-
-pip install ptychodus[globus,gui,ptychi]
-```
-The Dectris Cloud environment misses some libraries. Install the native Qt/XCB libraries required by the GUI:
-
-```
-conda install -c conda-forge \
-  libxcb libxkbcommon \
-  xcb-util xcb-util-image xcb-util-keysyms \
-  xcb-util-renderutil xcb-util-wm
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.local/bin/env
 ```
 
-Make the conda environment libraries visible to Qt:
+## Installing Ptychodus
 
+We now install Ptychodus as a uv tool. A uv tool is installed in a global environment. You can't import packages directly from that environment, but you can run executables in that environment as commandline tools.
 ```
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+uv tool install ptychodus[globus,gui,ptychi] --reinstall-package torch  # Works for CUDA 13.0
+
+mkdir -p $HOME/local/xcb-xinerama
+apt-get download libxcb-xinerama0
+dpkg-deb -x libxcb-xinerama0_*.deb $HOME/local/xcb-xinerama
+export LD_LIBRARY_PATH="$HOME/local/xcb-xinerama/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+```
+The lines after `uv tool install` install the missing libraries needed by Ptychodus' GUI.
+
+## Downloading the project workspace
+
+The data and scripts we will use in this workshop are on a GitHub repository. Large data files are managed by Git LFS. First download and install Git LFS:
+```
+cd ~/Downloads
+wget https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-linux-amd64-v3.7.1.tar.gz
+tar xvzf git-lfs-linux-amd64-v3.7.1.tar.gz
+cd git-lfs-3.7.1
+./install.sh --local
+git lfs install
 ```
 
-Launch Ptychodus:
+Now clone the project repository:
 ```
-ptychodus
-```
-
-> If you want to install Pty-Chi alone, just do `pip install pty-chi`. If you prefer local, project-specific environment, we recommend `uv` which always delivers strictly deterministic dependencies. Git clone Pty-Chi using `git clone https://github.com/AdvancedPhotonSource/pty-chi`, then run `uv sync` in the project root. 
-
-# Downloading data and scripts for this workshop
-
-Under `/dectris_cloud`, clone this repository:
-
-```
-https://github.com/mdw771/2026_coherence_ptycho_workshop.git
+cd /dectris_cloud
+git clone https://github.com/mdw771/2026_coherence_ptycho_workshop.git
 ```
 
-Some data files are tracked by Git LFS and may take time to download.
+Finally, run `uv sync` in the project root.
+```
+cd 2026_coherence_ptycho_workshop
+uv sync
+```
+uv would create a Python environment under this directory, download the packages from PyPI based on the versions and builds of the dependencies frozen in `uv.lock`.
+
+> Although we have also downloaded Pty-Chi as a dependency of Ptychodus when we installed Ptychodus as a uv tool, we can't use it directly as it's in the tool environment. In order for us to later use Pty-Chi directly, we need to install another copy of Pty-Chi in the project environment. 
