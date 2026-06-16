@@ -52,6 +52,6 @@ Finally, run `uv sync` in the project root.
 cd 2026_coherence_ptycho_workshop
 uv sync
 ```
-uv would create a Python environment under this directory, download the packages from PyPI based on the versions and builds of the dependencies frozen in `uv.lock`.
+uv would create a Python environment under this directory, download the packages from PyPI based on the versions and builds of the dependencies frozen in `uv.lock`, including Pty-Chi.
 
-> Although we have also downloaded Pty-Chi as a dependency of Ptychodus when we installed Ptychodus as a uv tool, we can't use it directly as it's in the tool environment. In order for us to later use Pty-Chi directly, we need to install another copy of Pty-Chi in the project environment. 
+> Although we have also downloaded Pty-Chi as a dependency of Ptychodus when we installed Ptychodus as a uv tool, we can't use it directly as it's in the tool environment. In order for us to later use Pty-Chi directly, we install another copy of Pty-Chi in the project environment with `uv sync`. 
