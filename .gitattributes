@@ -1,2 +1,10 @@
 data/tungsten/ptychodus_dp.hdf5 filter=lfs diff=lfs merge=lfs -text
 data/tungsten/ptychodus_para.hdf5 filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_1/ptychodus_dp.hdf5 filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_1/ptychodus_para.hdf5 filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_2/ptychodus_dp.hdf5 filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_2/ptychodus_para.hdf5 filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_1/recon_phase.tiff filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_1/recon_mag.tiff filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_2/recon_mag.tiff filter=lfs diff=lfs merge=lfs -text
+data/IC/IC_2/recon_phase.tiff filter=lfs diff=lfs merge=lfs -text
