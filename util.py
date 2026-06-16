@@ -1,9 +1,11 @@
+from typing import Any
+from pathlib import Path
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def load_ptychodus_data(dp_file, para_file):
+def load_ptychodus_data(dp_file: Path, para_file: Path) -> dict[str, Any]:
     with h5py.File(dp_file, "r") as dp_h5, h5py.File(para_file, "r") as para_h5:
         diffraction_patterns = dp_h5["dp"][:]
         probe = para_h5["probe"][:]
